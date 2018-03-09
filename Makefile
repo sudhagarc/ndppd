@@ -36,7 +36,7 @@ install: all
 	cp ndppd.service ${UNITDIR}
 
 rpm:
-	echo "Package version: ${PKG_VERSION}"
+	@echo "Package version: ${PKG_VERSION}"
 	rpmdev-setuptree
 	cd .. && tar zcf ndppd.tgz ndppd --transform 's/ndppd/ndppd-${PKG_VERSION}/' --exclude=.git
 	cp ndppd.spec ${RPMBUILD}/SPECS
@@ -44,8 +44,8 @@ rpm:
 	rpmbuild -ba --define 'pkg_version ${PKG_VERSION}' ${RPMBUILD}/SPECS/ndppd.spec
 
 rpmclean:
-	echo "Will remove ${RPMBUILD} directory. Enter key to proceed?"
-	read
+	@echo "Will remove ${RPMBUILD} directory. Press 'Enter' to proceed?"
+	@read
 	rm -fr ${RPMBUILD}
 	
 ndppd.1.gz:

@@ -5,7 +5,7 @@ Summary:	NDP Proxy Daemon
 
 Group:		NetUtils
 License:	GPLv3
-URL:			https://github.com/DanielAdolfsson/ndppd.git
+URL:			https://github.com/sudhagarc/ndppd.git
 Source0:	ndppd.tgz
 #Source0:	
 
@@ -42,4 +42,5 @@ rm -rf %{buildroot}
 
 %changelog
 * Thu Mar 08 2018 Sudhagar Chinnaswamy 	0.2.5
+	- Original source: https://github.com/DanielAdolfsson/ndppd
 	- Initial rpm release
