@@ -1,3 +1,14 @@
+2018-03-16  Sudhagar Chinnaswamy <sudhagar@gmail.com>
+
+    * Version 0.2.7
+
+        * Added support for creating RPM package on RedHat OS family
+        	(Tested on CentOS 7)
+          
+        * Fixed an issue where daemon mode didn't work as expected.
+          Removed daemonize implementation and used standard daemon
+          function. Tested on CentOS 7 and worked fine
+
 2017-01-07  Johnathan Sharratt <johnathan.sharratt@gmail.com>
 
     * Version 0.2.6

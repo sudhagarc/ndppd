@@ -11,9 +11,11 @@ ETCDIR	?= ${DESTDIR}/etc
 MANDIR  ?= ${DESTDIR}${PREFIX}/share/man
 SBINDIR ?= ${DESTDIR}${PREFIX}/sbin
 UNITDIR ?= ${DESTDIR}/usr/lib/systemd/system
-PKG_CONFIG ?= pkg-config
+RUNDIR  ?= ${DESTDIR}/var/run/ndppd
+
+PKG_CONFIG	?= pkg-config
 PKG_VERSION ?= $(shell git describe --tags | cut -f 1 -d-)
-RPMBUILD ?= ~/rpmbuild
+RPMBUILD	?= ~/rpmbuild
 
 OBJS     = src/logger.o src/ndppd.o src/iface.o src/proxy.o src/address.o \
            src/rule.o src/session.o src/conf.o src/route.o 
@@ -27,7 +29,8 @@ endif
 all: ndppd ndppd.1.gz ndppd.conf.5.gz
 
 install: all
-	mkdir -p ${SBINDIR} ${MANDIR} ${MANDIR}/man1 ${MANDIR}/man5 ${ETCDIR} ${UNITDIR}
+	mkdir -p ${SBINDIR} ${MANDIR} ${MANDIR}/man1 ${MANDIR}/man5 ${ETCDIR} \
+		${UNITDIR} ${RUNDIR}
 	cp ndppd ${SBINDIR}
 	chmod +x ${SBINDIR}/ndppd
 	cp ndppd.1.gz ${MANDIR}/man1

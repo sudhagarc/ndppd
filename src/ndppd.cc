@@ -33,37 +33,6 @@
 
 using namespace ndppd;
 
-static int daemonize()
-{
-    pid_t pid = fork();
-    if (pid < 0) {
-        logger::error() << "Failed to fork during daemonize: " << logger::err();
-        return -1;
-    }
-
-    if (pid > 0)
-        exit(0);
-
-    umask(0);
-
-    pid_t sid = setsid();
-    if (sid < 0) {
-        logger::error() << "Failed to setsid during daemonize: " << logger::err();
-        return -1;
-    }
-
-    if (chdir("/") < 0) {
-        logger::error() << "Failed to change path during daemonize: " << logger::err();
-        return -1;
-    }
-
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
-
-    return 0;
-}
-
 static ptr<conf> load_config(const std::string& path)
 {
     ptr<conf> cf, x_cf;
@@ -141,12 +110,12 @@ static bool configure(ptr<conf>& cf)
         route::ttl(30000);
     else
         route::ttl(*x_cf);
-    
+
     if (!(x_cf = cf->find("address-ttl")))
         address::ttl(30000);
     else
         address::ttl(*x_cf);
-    
+
     std::list<ptr<rule> > myrules;
 
     std::vector<ptr<conf> >::const_iterator p_it;
@@ -159,7 +128,7 @@ static bool configure(ptr<conf>& cf)
         if (pr_cf->empty()) {
             return false;
         }
-        
+
         bool promiscuous = false;
         if (!(x_cf = pr_cf->find("promiscuous")))
             promiscuous = false;
@@ -175,17 +144,17 @@ static bool configure(ptr<conf>& cf)
             pr->router(true);
         else
             pr->router(*x_cf);
-        
+
         if (!(x_cf = pr_cf->find("autowire")))
             pr->autowire(false);
         else
             pr->autowire(*x_cf);
-        
+
         if (!(x_cf = pr_cf->find("keepalive")))
             pr->keepalive(true);
         else
             pr->keepalive(*x_cf);
-        
+
         if (!(x_cf = pr_cf->find("retries")))
             pr->retries(3);
         else
@@ -195,7 +164,7 @@ static bool configure(ptr<conf>& cf)
             pr->ttl(30000);
         else
             pr->ttl(*x_cf);
-        
+
         if (!(x_cf = pr_cf->find("deadtime")))
             pr->deadtime(pr->ttl());
         else
@@ -214,7 +183,7 @@ static bool configure(ptr<conf>& cf)
             ptr<conf> ru_cf =* r_it;
 
             address addr(*ru_cf);
-            
+
             bool autovia = false;
             if (!(x_cf = ru_cf->find("autovia")))
                 autovia = false;
@@ -227,9 +196,9 @@ static bool configure(ptr<conf>& cf)
                 if (!ifa || ifa.is_null() == true) {
                     return false;
                 }
-                
+
                 ifa->add_parent(pr);
-                
+
                 myrules.push_back(pr->add_rule(addr, ifa, autovia));
             } else if (ru_cf->find("auto")) {
                 myrules.push_back(pr->add_rule(addr, true));
@@ -238,22 +207,22 @@ static bool configure(ptr<conf>& cf)
             }
         }
     }
-    
-    // Print out all the topology    
+
+    // Print out all the topology
     for (std::map<std::string, weak_ptr<iface> >::iterator i_it = iface::_map.begin(); i_it != iface::_map.end(); i_it++) {
         ptr<iface> ifa = i_it->second;
-        
+
         logger::debug() << "iface " << ifa->name() << " {";
-        
+
         for (std::list<weak_ptr<proxy> >::iterator pit = ifa->serves_begin(); pit != ifa->serves_end(); pit++) {
             ptr<proxy> pr = (*pit);
             if (!pr) continue;
-            
+
             logger::debug() << "  " << "proxy " << logger::format("%x", pr.get_pointer()) << " {";
-            
+
              for (std::list<ptr<rule> >::iterator rit = pr->rules_begin(); rit != pr->rules_end(); rit++) {
                 ptr<rule> ru = *rit;
-                
+
                 logger::debug() << "    " << "rule " << logger::format("%x", ru.get_pointer()) << " {";
                 logger::debug() << "      " << "taddr " << ru->addr()<< ";";
                 if (ru->is_auto())
@@ -264,21 +233,21 @@ static bool configure(ptr<conf>& cf)
                     logger::debug() << "      " << "iface " << ru->daughter()->name() << ";";
                 logger::debug() << "    }";
              }
-            
+
             logger::debug() << "  }";
         }
-        
+
         logger::debug() << "  " << "parents {";
         for (std::list<weak_ptr<proxy> >::iterator pit = ifa->parents_begin(); pit != ifa->parents_end(); pit++) {
             ptr<proxy> pr = (*pit);
-            
+
             logger::debug() << "    " << "parent " << logger::format("%x", pr.get_pointer()) << ";";
         }
         logger::debug() << "  }";
-        
+
         logger::debug() << "}";
     }
-    
+
     return true;
 }
 
@@ -298,7 +267,7 @@ int main(int argc, char* argv[], char* env[])
     std::string config_path("/etc/ndppd.conf");
     std::string pidfile;
     std::string verbosity;
-    bool daemon = false;
+    bool is_daemon = false;
 
     while (1) {
         int c, opt;
@@ -322,7 +291,7 @@ int main(int argc, char* argv[], char* env[])
             break;
 
         case 'd':
-            daemon = true;
+            is_daemon = true;
             break;
 
         case 'p':
@@ -354,11 +323,12 @@ int main(int argc, char* argv[], char* env[])
     if (!configure(cf))
         return -1;
 
-    if (daemon) {
-        logger::syslog(true);
-
-        if (daemonize() < 0)
+    if (is_daemon) {
+        if (daemon(0, 0) < 0) {
+            logger::notice() << "Unable to run in daemon mode. Exiting";
             return 1;
+        }
+        logger::syslog(true);
     }
 
     if (!pidfile.empty()) {
@@ -398,7 +368,7 @@ int main(int argc, char* argv[], char* env[])
 
         if (rule::any_auto())
             route::update(elapsed_time);
-        
+
         if (rule::any_iface())
             address::update(elapsed_time);
 
@@ -413,4 +383,3 @@ int main(int argc, char* argv[], char* env[])
 
     return 0;
 }
-

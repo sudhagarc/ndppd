@@ -1,6 +1,6 @@
                      ndppd - NDP Proxy Daemon
 
-                          Version 0.2.5
+                          Version 0.2.7
 
 ------------------------------------------------------------------------
 1. Legal
@@ -26,37 +26,37 @@
 2. About 'ndppd'
 ------------------------------------------------------------------------
 
-   'ndppd', or NDP Proxy Daemon, is a daemon that proxies NDP (Neighbor 
+   'ndppd', or NDP Proxy Daemon, is a daemon that proxies NDP (Neighbor
    Discovery Protocol) messages between interfaces.
 
-   The Neighbor Discovery Protocol (NDP) is a protocol in the Internet 
-   Protocol Suite used with Internet Protocol Version 6 (IPv6). It 
-   operates in the Link Layer of the Internet model (RFC 1122) and is 
-   responsible for address autoconfiguration of nodes, discovery of 
-   other nodes on the link, determining the Link Layer addresses 
-   of other nodes, duplicate address detection, finding available 
-   routers and Domain Name System (DNS) servers, address prefix 
-   discovery, and maintaining reachability information about the paths 
+   The Neighbor Discovery Protocol (NDP) is a protocol in the Internet
+   Protocol Suite used with Internet Protocol Version 6 (IPv6). It
+   operates in the Link Layer of the Internet model (RFC 1122) and is
+   responsible for address autoconfiguration of nodes, discovery of
+   other nodes on the link, determining the Link Layer addresses
+   of other nodes, duplicate address detection, finding available
+   routers and Domain Name System (DNS) servers, address prefix
+   discovery, and maintaining reachability information about the paths
    to other active neighbor nodes (RFC 4861). (Wikipedia)
 
-   'ndppd' currently only supports Neighbor Solicitation Messages and 
+   'ndppd' currently only supports Neighbor Solicitation Messages and
    Neighbor Advertisement Messages.
 
    Before an IPv6 packet can be sent to a host, that host's link-layer
    address must first be discovered. This is done by sending a Neighbor
    Solicitation message containing the requested target IPv6 address
    to a specific multicast address.  If a host have configured a
-   matching IP, that host will then respond with a Neighbor 
-   Advertisement message, and provide it's link-layer address. 
+   matching IP, that host will then respond with a Neighbor
+   Advertisement message, and provide it's link-layer address.
 
    Let's say you want to route some IPs to another interface, and
    your ISP isn't truly routing your subnet to your host. It means
    that your host will have respond to Neighbor Solicitation messages
    for IPs it haven't configured in order to be able to route them.
 
-   Linux have a limited support for proxying Neighbor Solicitation 
-   messages by simply answering to any messages where the target IP 
-   can be found in the host's neighbor proxy table. To make this work 
+   Linux have a limited support for proxying Neighbor Solicitation
+   messages by simply answering to any messages where the target IP
+   can be found in the host's neighbor proxy table. To make this work
    you need to enable "proxy_ndp", and then add each single host to the
    neighbor proxy table by typing something like:
 
@@ -65,13 +65,13 @@
    Unfortunately, it doesn't support listing proxies, and as I said,
    only individual IPs are supported. No subnets.
 
-   'ndppd' solves this by listening for Neighbor Solicitation messages 
+   'ndppd' solves this by listening for Neighbor Solicitation messages
    on an interface, then query the internal interfaces for that target
-   IP before finally sending a Neighbor Advertisement message. 
+   IP before finally sending a Neighbor Advertisement message.
 
-   You can create rules to query one interface for one subnet, and 
-   another interface for another. 'ndppd' can even respond directly to 
-   Neighbor Solicitation messages without querying anything, should you 
+   You can create rules to query one interface for one subnet, and
+   another interface for another. 'ndppd' can even respond directly to
+   Neighbor Solicitation messages without querying anything, should you
    need that.
 
 ------------------------------------------------------------------------
@@ -101,8 +101,8 @@
 5. Usage
 ------------------------------------------------------------------------
 
-   Read through 'ndppd.conf-dist' for guidelines and examples how to 
-   configure the daemon. 
+   Read through 'ndppd.conf-dist' for guidelines and examples how to
+   configure the daemon.
 
    Usage: ndppd [-d] [-c <config>] [-p <pidfile>]
 
